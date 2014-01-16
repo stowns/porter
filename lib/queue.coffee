@@ -172,7 +172,7 @@ class Queue
       callback(null, stats)
 
   @__commands__: (search, prefix_to_remove, callback) ->
-    create_client().keys search, (err, commands) ->
+    create_client().scan_keys search, (err, commands) ->
       return callback(err) if err?
       callback(null, commands.map (q) -> q.slice(prefix_to_remove.length))
 
@@ -185,9 +185,9 @@ class Queue
   @queues: (callback) ->
     client = create_client()
     async.parallel {
-      queues: (cb) -> client.keys("#{settings.namespace}:q:*", cb)
-      work_queues: (cb) -> client.keys("#{settings.namespace}:w:*", cb)
-      stats_queues: (cb) -> client.keys("#{settings.namespace}:s:q:*", cb)
+      queues: (cb) -> client.scan_keys("#{settings.namespace}:q:*", cb)
+      work_queues: (cb) -> client.scan_keys("#{settings.namespace}:w:*", cb)
+      stats_queues: (cb) -> client.scan_keys("#{settings.namespace}:s:q:*", cb)
     }, (err, data) ->
       return callback(err) if err?
       queues = data.queues.map (q) -> q.slice("#{settings.namespace}:q:".length)

@@ -1,9 +1,9 @@
 # redis namespace
 exports.namespace = 'porter'
+_ = require 'underscore'
 
 # timeout for a job to get reaped (set on pop)
 exports.timeout = 30
-
 exports.redis = {
   host: 'localhost'
   port: 6379
@@ -23,7 +23,26 @@ exports.redis = {
     
     client = redis.createClient(port, host)
     client.auth(password) if password?
-    
+
+    client['scan_keys'] = (arg, cb) ->
+      start = Date.now();
+      keys = []
+      doScan = (args, cb) ->
+        args.push("COUNT");
+        args.push(500);
+        client.scan args, (err, result) ->
+          return cb(err, result) if err? 
+          keys.push(result[1]) if result[1].length > 0
+          if result[0] is "0"
+            duration = Date.now() - start;
+            console.log "Total execution for #{arg} : #{duration}"
+            keys = _.flatten(keys)
+            keys = _.unique(keys)
+            return cb(err, keys) 
+          doScan([result[0], "MATCH", arg], cb)
+
+      doScan([0, "MATCH", arg], cb)
+
     exports.redis.__client__ = client
 }
 
