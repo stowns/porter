@@ -261,7 +261,7 @@ class Worker extends EventEmitter
       callback(null, o)
 
   @workers: (callback) ->
-    create_client().keys "#{settings.namespace}:worker:*", (err, keys) ->
+    create_client().scan_keys "#{settings.namespace}:worker:*", (err, keys) ->
       return callback(err) if err?
       callback(null, keys.map (k) -> k.slice("#{settings.namespace}:worker:".length))
 
