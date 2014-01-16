@@ -29,7 +29,7 @@ exports.redis = {
       keys = []
       doScan = (args, cb) ->
         args.push("COUNT");
-        args.push(500);
+        args.push(1000);
         client.scan args, (err, result) ->
           return cb(err, result) if err? 
           keys.push(result[1]) if result[1].length > 0
